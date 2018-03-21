@@ -1,6 +1,8 @@
 ThinkAdmin 1.0
 ===============
 
+composer create-project fengxin2017/thinkadmin
+
 微品匠心后台管理系统使用thinkphp5.1版本开发。
 
 静态页面修改请参考 http://www.layui.com/。
