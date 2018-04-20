@@ -3,53 +3,60 @@
 namespace app\admin\controller;
 
 use app\admin\model\Admin as AdminModel;
-use app\admin\model\Config;
 use app\admin\model\Role;
 use app\admin\validate\AdminStoreValidate;
 use app\admin\validate\AdminUpdateValidate;
+use app\admin\validate\ShouldCheckCsrfValidate;
+use app\lib\exception\BaseException;
 use think\Request;
 
 class Admin extends Base
 {
+    protected $beforeActionList = [ 
+        // must use lowerCase try find answer with doc
+        // 'shouldCheckCsrfToken' => [
+        //     'only' => 'store,update,delete,status,deletemany,getdata'
+        // ]
+    ];
+
     public function index(Request $request)
     {
-        $list_rows = Config::where(['name' => 'list_rows'])->value('value');
-        $p         = input('p', 1);
-        $key       = input('post.key', '');
-        return view('index', ['key' => $key, 'p' => $p, 'list_rows' => $list_rows]);
+        return view('index', [
+            'key' => input('post.key', ''), 
+            'p' => input('p', 1), 
+            'list_rows' => $this->limits
+        ]);
     }
 
     public function getData(Request $request)
     {
-
         $limits  = $request->get('limit');
         $nowPage = $request->get('page');
-        if ($request->get('key') == '') {
-            $lists = AdminModel::with('role')->select();
+        if (!$key = $request->get('key')) {
+            $lists = AdminModel::where('id','<>',1)->with('role')->select();
         } else {
-            $key   = $request->get('key');
-            $lists = AdminModel::where('name', 'like', '%' . $key . '%')->with('role')->select();
+            $lists = AdminModel::where('id','<>',1)->where('name', 'like', '%' . $key . '%')->with('role')->select();
         }
         $count   = count($lists);
         $allPage = (int) ceil($count / $limits);
         $data    = page($nowPage, $limits, $allPage, $lists);
-        return ["code" => 0, "msg" => "", "count" => $count, 'data' => $data];
+        return json(["code" => 0, "msg" => "", "count" => $count, 'data' => $data,'csrftoken' => session('csrftoken')]);
     }
 
     public function create()
     {
-        $roles = Role::all();
-        return view('create', ['roles' => $roles]);
+        return view('create', ['roles' => Role::all()]);
     }
 
     public function store(Request $request, AdminStoreValidate $validate)
     {
         if (!$validate->check($request->post())) {
-            return ['code' => 0, 'msg' => $validate->getError()];
+            return json(['code' => 0, 'msg' => $validate->getError()]);
         }
         if (AdminModel::create($request->post())) {
-            return ['code' => 1, 'msg' => '添加用户成功'];
+            return json(['code' => 1, 'msg' => '添加用户成功']);
         }
+        return json(['code' => 0 , 'msg' => '添加用户失败']);
     }
     public function edit($id, $page)
     {
@@ -63,45 +70,45 @@ class Admin extends Base
     public function update(Request $request, AdminUpdateValidate $validate)
     {
         $data = $request->post('password') ? $request->post() : $request->except('password');
-        if (!$validate->check($data)) {
-            return ['code' => 0, 'msg' => $validate->getError()];
+        if (!$validate->check($request->post())) {
+            return json(['code' => 0, 'msg' => $validate->getError()]);
         }
-        if (AdminModel::update($data)) {
-            return ['code' => 1, 'msg' => '编辑成功'];
+        if (false !== AdminModel::update($data)) {
+            return json(['code' => 1, 'msg' => '编辑成功']);
         }
+        return json(['code' => 0 , 'msg' => '编辑失败']);
     }
 
     public function delete($id)
     {
         if (AdminModel::destroy($id)) {
-            $count = AdminModel::count();
-            return ['code' => 1, 'msg' => '删除成功', 'count' => $count];
+            return json(['code' => 1, 'msg' => '删除成功', 'count' =>  AdminModel::count()]);
         }
+        return json(['code' => 0 , 'msg' => '删除失败','count' => AdminModel::count()]);
     }
     public function deleteMany(Request $request)
     {
-        $data = $request->post();
         $ids  = [];
-        foreach ($data['arrIds'] as $key => $v) {
+        foreach ($request->post('arrIds/a') as $key => $v) {
             $ids[] = (int) $v;
         }
         if (AdminModel::destroy($ids)) {
-            $count = AdminModel::count();
-            return ['code' => 1, 'msg' => '删除成功', 'count' => $count];
+            return json(['code' => 1, 'msg' => '删除成功', 'count' => AdminModel::count()]);
         }
+        return json(['code' => 0 , 'msg' => '删除失败','count' => AdminModel::count()]);
     }
+    
     public function status(Request $request)
     {
-        $id    = $request->get('id');
-        $admin = AdminModel::get($id);
+        $admin = AdminModel::get($request->get('id'));
         if ($admin->status == 1) {
             $admin->status = 0;
             $admin->save();
-            return ['code' => 1, 'msg' => '已禁用'];
+            return json(['code' => 1, 'msg' => '已禁用']);
         }
         $admin->status = 1;
         $admin->save();
-        return ['code' => 0, 'msg' => '已开启'];
+        return json(['code' => 0, 'msg' => '已开启']);
     }
 
 }

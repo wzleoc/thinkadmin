@@ -19,6 +19,8 @@
             <div class="example-wrap">
                 <div class="example">
                     <form id="ruleorder" name="ruleorder" method="post" action="{:url('order')}" >
+                        <input type="hidden" name="temp" value="手册写烂不得以">
+                        {:token()}
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr class="long-tr">
@@ -85,6 +87,7 @@
                     <h3 class="modal-title">添加菜单</h3>                  
                 </div>
                 <form class="form-horizontal" name="add_rule" id="add_rule" method="post" action="{:url('Menu/MenuStore')}">
+                    {:token()}
                     <div class="ibox-content">
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">所属父级</label>
@@ -153,20 +156,21 @@
         $('#add_rule').ajaxForm({
             beforeSubmit: checkForm, 
             success: complete, 
+            error : error,
             dataType: 'json'
         });
         
         function checkForm(){
             if( '' == $.trim($('#title').val())){
                 layer.msg('请输入菜单名称',{icon:2,time:1500,shade: 0.1}, function(index){
-                layer.close(index);
+                    layer.close(index);
                 });
                 return false;
             }
             
             if( '' == $.trim($('#name').val())){
                 layer.msg('控制器/方法不能为空',{icon:0,time:1500,shade: 0.1}, function(index){
-                layer.close(index);
+                    layer.close(index);
                 });
                 return false;
             }
@@ -179,9 +183,17 @@
                     window.location.href="{:url('Menu/index')}";
                 });
             }else{
-                layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1});
+                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                    layer.close(index);
+                });
                 return false;   
             }
+        }
+
+        function error(data){
+            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                layer.close(index);   
+            });
         }
      
     });
@@ -202,7 +214,6 @@
             }else{
                 layer.msg(data.msg, {icon: 2,time:1500,shade: 0.1}, function(index){
                     layer.close(index);
-                    window.location.href=data.url;
                 });
             }
         }

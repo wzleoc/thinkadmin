@@ -20,6 +20,7 @@
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" name="roleAdd" id="roleAdd" method="post" action="{:url('Role/store')}">
+                        {:token()}
                         <div class="form-group">
                             <label class="col-sm-3 control-label">角色名称：</label>
                             <div class="input-group col-sm-4">
@@ -48,13 +49,14 @@
         $('#roleAdd').ajaxForm({
             beforeSubmit: checkForm, 
             success: complete, 
+            error : error,
             dataType: 'json'
         });
         
         function checkForm(){
             if( '' == $.trim($('#title').val())){
                 layer.msg('请输入角色名称',{icon:2,time:1500,shade: 0.1}, function(index){
-                layer.close(index);
+                    layer.close(index);
                 });
                 return false;
             }
@@ -67,9 +69,17 @@
                     window.location.href="{:url('role/index')}";
                 });
             }else{
-                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1});
+                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                    layer.close(index);
+                });
                 return false;   
             }
+        }
+
+        function error(data){
+            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                layer.close(index);   
+            });
         }
      
     });

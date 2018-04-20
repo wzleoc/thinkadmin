@@ -1,5 +1,6 @@
 {include file="public/header" /}
 <link href="__CSS__/plugins/iCheck/custom.css" rel="stylesheet">
+
 <body class="gray-bg">
 <div class="wrapper wrapper-content animated fadeInRight">
     <!-- Panel Other -->
@@ -31,7 +32,7 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th><input class="i-checks checkbox check-all" checked="chedked" type="checkbox"></th>
+                                <th style="text-align: center;"><input class="i-checks checkbox check-all" checked="chedked" type="checkbox"></th>
                                 <th>表名</th>
                                 <th>数据量</th>
                                 <th>数据大小</th>
@@ -44,7 +45,7 @@
                             {notempty name="data"}
                                 {volist name="data" id="vo"}
                                 <tr>
-                                    <td><input class="ids i-checks" checked="chedked" type="checkbox" name="ids[]" value="{$vo.name}"></td>
+                                    <td style="text-align: center;"><input class="ids i-checks" checked="chedked" type="checkbox" name="ids[]" value="{$vo.name}"></td>
                                     <td>{$vo.name}</td>
                                     <td>【{$vo.rows}】 条记录</td>
                                     <td>{$vo.data_length|format_bytes}</td>
@@ -101,6 +102,11 @@ function repair(name){
                 layer.close(index);
                 window.location.href="{:url('Data/index')}";
             });
+        },
+        error : function(error){
+            layer.msg('无权访问',{icon:5,time:1500,shade: 0.1},function(index){
+                layer.close(index);   
+            });
         }
     })
 }
@@ -112,7 +118,6 @@ $('.check-all').on('ifUnchecked', function (event) {
     $('input[name="ids[]"]').iCheck('uncheck');
 });
     $(function () {
-     
         (function ($) {
             var $form = $("#export-form"), $export = $("#export"), tables, $optimize = $("#optimize"), $repair = $("#repair");
             $optimize.add($repair).click(function () {

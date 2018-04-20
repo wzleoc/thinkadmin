@@ -7,6 +7,12 @@ use think\Request;
 use app\admin\model\Config;
 class Index extends Base
 {
+    protected $beforeActionList = [ 
+        // must use lowerCase try find answer with doc
+        // 'shouldCheckCsrfToken' => [
+        //     'only' => 'updatepwd'
+        // ]
+    ];
 
     public function index()
     {
@@ -35,7 +41,7 @@ class Index extends Base
 
     public function updatepwd(Request $request, UpdatePasswordValidate $validate)
     {
-        if ($validate->check($request->post())) {
+        if (!$validate->check($request->post())) {
             return ['code' => 0, 'msg' => $validate->getError()];
         }
         $user = Admin::get(session('admin.id'));
@@ -43,8 +49,12 @@ class Index extends Base
             return ['code' => -1, 'msg' => '旧密码错误'];
         } else {
             $user->password = $request->post('password');
-            $user->save();
-            return ['code' => 1, 'msg' => '修改成功'];
+            if($user->save()){
+                return ['code' => 1, 'msg' => '修改成功'];
+            }else{
+                return ['code' => 0 , 'msg' => '修改失败'];
+            }
+            
         }
     }
 }

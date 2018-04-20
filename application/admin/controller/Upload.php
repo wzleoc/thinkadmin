@@ -6,10 +6,9 @@ use think\Request;
 use Qiniu\Storage\UploadManager;
 use Qiniu\Auth;
 use app\admin\model\Config;
-use think\Controller;
 
 
-class Upload extends Controller
+class Upload extends Base
 {
     //图片上传
     public function upload(Request $request)

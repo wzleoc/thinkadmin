@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="renderer" content="webkit"> 
+    <meta name="csrf-token" content="{$Request.token}">
     <title>微品匠心后台登录</title>
     <link href="__CSS__/bootstrap.min.css" rel="stylesheet">
     <link href="__CSS__/font-awesome.min.css?v=4.4.0" rel="stylesheet">
@@ -58,7 +59,15 @@
 <script type="text/javascript" src="__JS__/layer/layer.js"></script>
 <script type="text/javascript" src="__JS__/artisan.js"></script> 
 <script type="text/javascript" src="__JS__/jquery.slider.min.js"></script>
+<!-- <script type="text/javascript">
+    $.ajaxSetup({
+        data : {
+            '__token__' : $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+</script> -->
 <script type="text/javascript">
+
     var check_result = false;
     $("#slider").slider({
         width: 233, // width

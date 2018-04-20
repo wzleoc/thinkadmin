@@ -3,38 +3,35 @@
 namespace app\admin\controller;
 
 use app\admin\model\Admin;
-use app\admin\model\NodeRole;
 use app\admin\model\Role as RoleModel;
-use think\Controller;
+use app\admin\validate\RoleStoreValidate;
+use app\admin\validate\RoleUpdateValidate;
+use app\admin\validate\RoleDeleteValidate;
 use think\Request;
 
 class Role extends Base
 {
-    protected $limits;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->limits = config('admin.list_rows');
-    }
-
+    protected $beforeActionList = [ 
+        // 'shouldCheckCsrfToken' => [
+        //     'only' => 'store,update,delete,postaccessdata,getroledata'
+        // ]
+    ]; 
+    
     public function index(Request $request)
     {
-        $key = $request->get('key') ?: '';
-        return view('index', ['key' => $key, 'limits' => $this->limits]);
+        return view('index', ['key' => input('key', ''), 'limits' => $this->limits]);
     }
 
     public function getRoleData(Request $request)
     {
-
-        $nowPage = $request->get('page') ?: 1;
-        $lists   = $request->get('key') 
-                ? RoleModel::where('role_name', 'like', '%' . $request->get('key') . '%')->select() 
-                : RoleModel::all();
+        $nowPage = $request->post('page') ?: 1;
+        $lists   = $request->post('key')
+        ? RoleModel::where('role_name', 'like', '%' . $request->post('key') . '%')->select()
+        : RoleModel::all();
         $count   = count($lists);
         $allPage = (int) ceil($count / $this->limits);
         $data    = page($nowPage, $this->limits, $allPage, $lists);
-        return ['data' => $data, 'count' => $count];
+        return json(['data' => $data, 'count' => $count , 'code' => 1]);
     }
 
     public function create()
@@ -42,10 +39,15 @@ class Role extends Base
         return view();
     }
 
-    public function store(Request $request)
+    public function store(Request $request, RoleStoreValidate $validate)
     {
+        if (!$validate->check($request->post())) {
+            return json(['code' => 0, 'msg' => $validate->getError()]);
+        }
         if (RoleModel::create($request->post())) {
             return json(['code' => 1, 'msg' => '添加角色成功']);
+        } else {
+            return json(['code' => 0, 'msg' => '添加角色失败']);
         }
     }
 
@@ -54,42 +56,66 @@ class Role extends Base
         return view('edit', ['role' => RoleModel::get($id)]);
     }
 
-    public function update(Request $request)
+    public function update(Request $request, RoleUpdateValidate $validate)
     {
-        RoleModel::update($request->post());
-        return ['code' => 1, 'msg' => '更新角色成功'];
+        if (!$validate->check($request->post())) {
+            return json(['code' => 0, 'msg' => $validate->getError()]);
+        }
+        if (false !== RoleModel::update($request->post())) {
+            return json(['code' => 1, 'msg' => '更新角色成功']);
+        }else{
+            return json(['code' => 0 , 'msg' => '更新角色失败']);
+        }
     }
 
-    public function delete($id)
+    public function delete(RoleDeleteValidate $validate ,Request $request)
     {
-        if (RoleModel::destroy($id)) {
-            Admin::where(['role_id' => $id])->update(['role_id' => null]);
-            NodeRole::del($id);
+        if(!$validate->check($request->get())){
+            return json(['code' => 0 , 'msg' => $validate->getError()]);
         }
-        return ['code' => 1, 'msg' => '删除角色成功'];
+        if($role = RoleModel::where(['id' => $request->get('id')])->find()){
+            $role->nodes()->detach();
+        }
+        if (RoleModel::destroy($request->get('id'))) {
+            if (false !== Admin::where(['role_id' => $request->get('id')])->update(['role_id' => 0])) {
+                return json(['code' => 1, 'msg' => '删除角色成功']);
+            }else{
+                return json(['code' => 0 , 'msg' => '删除角色失败']);
+            }
+        }else{
+            return json(['code' => 0 , 'msg' => '删除角色失败']);
+        }
+        return json(['code' => 0, 'msg' => '删除失败']);
     }
-    // 差距在这些地方 laravel的sync     $request->post('nodeArr') 如果是数组取不到
+    
     public function getAccessData(Request $request)
     {
-        $role = RoleModel::get($request->param('id'));
         if ('get' == $request->get('type')) {
-            $nodes = $role->getNodeInfo();
-            return ['code' => 1, 'data' => $nodes, 'msg' => 'succeess'];
-        }
+            return json([
+                'code' => 1, 
+                'data' => RoleModel::get($request->param('id'))->getNodeInfo(), 
+                'msg' => 'succeess'
+            ]);
+        } 
+        throw new BaseException();
+    }
+    // 差距在这些地方 laravel的sync
+    public function postAccessData(Request $request){
+        $role = RoleModel::get($request->param('id'));
         if ('give' == $request->post('type')) {
-            $data = $request->post();
             $role->nodes()->detach();
-            $nodeArr = isset($data['nodeArr']) ? $data['nodeArr'] : [];
-            if ($nodeArr) {
+            if ($request->post('nodeArr/a')) {
                 foreach ($nodeArr as $k => $v) {
                     $nodeArr[$k] = (int) $v;
                 }
                 $role->nodes()->attach($nodeArr);
             }
-            $nodes = $role->getNodeInfo();
-            return ['code' => 1, 'data' => $nodes, 'msg' => '分配权限成功'];
+            return json([
+                'code' => 1, 
+                'data' => $role->getNodeInfo(), 
+                'msg' => '分配权限成功'
+            ]);
         }
-        return ['code' => 0, 'msg' => '获取失败', 'data' => []];
+        throw new BaseException();
     }
-
 }

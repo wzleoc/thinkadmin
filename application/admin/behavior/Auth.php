@@ -20,12 +20,20 @@ class Auth extends Controller
         if (session('admin.id') != 1) {
             if (!in_array($url, 
                 [
+                    'admin/index/editpwd',
+                    'admin/index/updatepwd',
                     'admin/index/index', 
                     'admin/index/indexpage', 
                     'admin/upload/upload', 
-                    'admin/upload/uploadqiniu',    
+                    'admin/upload/uploadqiniu',
                 ])) {
                 if (!$this->_urlCheck($url)) {
+                    // if(request()->isAjax()){
+                    //     return json([
+                    //         'code' => 0,
+                    //         'msg'  => '无权访问'
+                    //     ]);
+                    // }
                     $this->redirect('admin/index/index');
                 }
             }
@@ -40,8 +48,10 @@ class Auth extends Controller
             return false;
         }
         $nodes = $role->nodes()->select();
+
         foreach ($nodes as $value) {
-            if ($url == $value['name']) {
+            
+            if ($url == $value['name'] || in_array($url , config('auth.' . $value['name']) ? config('auth.' . $value['name']) : [])) {
                 $access = true;
                 break;
             }

@@ -6,28 +6,29 @@ use app\admin\model\Admin;
 use app\admin\validate\LoginValidate;
 use think\Controller;
 use think\Request;
+use app\admin\validate\ShouldCheckCsrfValidate;
+use app\lib\exception\BaseException;
 
 class Login extends Controller
 {
-    protected $loginValidate;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->loginValidate = new LoginValidate();
-    }
+    protected $beforeActionList = [ 
+        // 'shouldCheckCsrfToken' => [
+        //     'only' => 'dologin,logout'
+        // ]
+    ];
 
     public function index()
     {
         return view('index', ['verify_type' => config('admin.verify_type')]);
     }
 
-    public function doLogin(Request $request)
+    public function doLogin(Request $request , LoginValidate $validate)
     {
-        if (!$this->loginValidate->check($request->post())) {
-            return ['code' => 0, 'msg' => $this->loginValidate->getError()];
+        if (!$validate->check($request->post())) {
+            return ['code' => 0, 'msg' => $validate->getError()];
         }
-        return Admin::checkLogin($request);
+        return json(Admin::checkLogin($request));
+        // return json(Admin::checkLogin($request))->header('token',session('csrftoken'));
     }
 
     public function logout()
@@ -36,6 +37,13 @@ class Login extends Controller
         return redirect('admin/login/index');
     }
 
+    protected function shouldCheckCsrfToken()
+    {
+        $validate = new ShouldCheckCsrfValidate();
+        if(!$validate->check(request()->param())){
+            throw new BaseException();                              
+        }
+    }
     // private function _checkVerifyCode(){
 
     // }

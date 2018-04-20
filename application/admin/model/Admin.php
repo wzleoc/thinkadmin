@@ -14,15 +14,19 @@ class Admin extends Model
         return md5(md5($value));
     }
 
-    public static function checkLogin( $info ){
-        $username = $info->post('username');
-        $password = $info->post('password');
+    public static function checkLogin( $request ){
+        $username = $request->post('username');
+        $password = $request->post('password');
         if($admin = self::where(['name'=>$username,'password'=>md5(md5($password))])->find()){
             session('admin',$admin);
-            return ['code' => 1 , 'msg' => '登录成功' , 'url'=>'/admin/index/index'];
+            session('csrftoken',md5($admin->id . 'LaravelForever' . mt_rand(0,99999)));
+            // header('Cache-control', 'no-cache,must-revalidate');
+            // header('token',session('csrftoken'));
+            return ['code' => 1 , 'msg' => '登录成功' , 'url'=>url('admin/index/index')];
         }
         return ['code' => 2, 'msg' => '账户密码错误'];
     }
+
     public function getMenu(){
         $nodes = [];
         $nodes = $this->role->nodes()->column('id');
@@ -35,7 +39,6 @@ class Admin extends Model
         }else{
         	$nodes = Node::where(['status'=>1])->whereIn('id',$nodeArr)->select();
         }
-
         return $this->prepareMenu($nodes->toArray());
     }
 
@@ -61,7 +64,7 @@ class Admin extends Model
                 }
             }
         }
-
+        
         unset($child);
         return $parent;
     }

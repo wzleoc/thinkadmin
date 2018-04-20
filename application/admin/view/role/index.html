@@ -99,7 +99,6 @@
         </div>
     </div>
 </div>
-
 {include file="public/footer" /}
 <link rel="stylesheet" href="/static/admin/js/plugins/zTree/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="/static/admin/js/plugins/zTree/jquery.ztree.core-3.5.js"></script>
@@ -115,32 +114,50 @@
     Ajaxpage();
     function Ajaxpage(curr){
         var key=$('#key').val();
-        $.getJSON("{:url('Role/getRoleData')}", {page: curr || 1,key:key}, function(data){
-            $(".spiner-example").css('display','none'); //数据加载完关闭动画 
-            if(data.data==''){
-                $("#list-content").html('<td colspan="20" style="padding-top:10px;padding-bottom:10px;font-size:16px;text-align:center">暂无数据</td>');
-            }else{
-                var tpl = document.getElementById('list-template').innerHTML;
-                laytpl(tpl).render(data.data, function(html){
-                    document.getElementById('list-content').innerHTML = html;
-                });
-                laypage.render({
-                    elem: $('#AjaxPage'),//容器。值支持id名、原生dom对象，jquery对象,
-                    count:data.count,
-                    limit:'{$limits}',
-                    skip: true,//是否开启跳页
-                    skin: '#1AB5B7',//分页组件颜色
-                    curr: curr || 1,
-                    groups: 3,//连续显示分页数
-                    jump: function(obj, first){
-                        if(!first){
-                            Ajaxpage(obj.curr)
+        $.ajax({
+            url : "{:url('Role/getRoleData')}",
+            type:'post',
+            dataType: 'json',
+            data : {
+                page: curr || 1,
+                key : key,
+            },
+            success : function(data){
+                $(".spiner-example").css('display','none'); //数据加载完关闭动画 
+                if(data.data==''){
+                    $("#list-content").html('<td colspan="20" style="padding-top:10px;padding-bottom:10px;font-size:16px;text-align:center">暂无数据</td>');
+                }else{
+                    var tpl = document.getElementById('list-template').innerHTML;
+                    laytpl(tpl).render(data.data, function(html){
+                        document.getElementById('list-content').innerHTML = html;
+                    });
+                    laypage.render({
+                        elem: $('#AjaxPage'),//容器。值支持id名、原生dom对象，jquery对象,
+                        count:data.count,
+                        limit:'{$limits}',
+                        skip: true,//是否开启跳页
+                        skin: '#1AB5B7',//分页组件颜色
+                        curr: curr || 1,
+                        groups: 3,//连续显示分页数
+                        jump: function(obj, first){
+                            if(!first){
+                                Ajaxpage(obj.curr)
+                            }
+                            $('#allpage').html('第'+ obj.curr +'页，共'+ obj.pages +'页');
                         }
-                        $('#allpage').html('第'+ obj.curr +'页，共'+ obj.pages +'页');
-                    }
+                    });
+                }
+            },
+            error : function(error){
+                $(".spiner-example").css('display','none');
+                layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                    layer.close(index);   
                 });
             }
-        });
+        })
+        // $.getJSON("{:url('Role/getRoleData')}", {page: curr || 1,key:key}, function(data){
+            
+        // });
     }
 
     //编辑角色
@@ -153,22 +170,30 @@
             $.ajax({
                 url : "{:url('Role/delete')}",
                 type : 'get',
-                data : {id:id},
+                data : {
+                    id:id,
+                },
                 dataType : 'json',
                 success : function(data){
                     if(data.code == 1){
-                        layer.msg(data.msg,{icon:1,time:1000,shade: 0.1},function(){
+                        layer.msg(data.msg,{icon:1,time:1000,shade: 0.1},function(index){
+                            layer.close(index);
                             location.href = "{:url('Role/index')}";
                         });
+                    }else{
+                        layer.msg(data.msg,{icon:5,time:1000,shade: 0.1},function(index){
+                            layer.close(index);
+                        });
+                        return false
                     }
                 },
                 error : function(data){
-                    layer.msg('无权删除',{icon:4,time:1500});
+                    layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                        layer.close(index);   
+                    });
                 }
             });
-            layer.close(index);
-        });
-        
+        });   
     }
     //角色状态
     // function role_state(id){
@@ -214,7 +239,6 @@
                             }
                         }
                     };
-
                     $.fn.zTree.init($("#treeType"), setting, zNodes);
                     var zTree = $.fn.zTree.getZTreeObj("treeType");
                     zTree.expandAll(true);
@@ -226,8 +250,8 @@
             },
             error:function(){
                 layer.close(index2);
-                layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index3){
-                    layer.close(index3);
+                layer.msg('无权访问',{icon:5,time:1500,shade: 0.1},function(index){
+                    layer.close(index);
                 });
             }
 
@@ -245,19 +269,51 @@
         });
         var id = $("#nodeid").val();
         //写入库
-
-        $.post("{:url('Role/getAccessData')}", {'type' : 'give', 'id' : id, 'nodeArr' : NodeArr}, function(res){
-            layer.close(index);
-            if(res.code == 1){
+        $.ajax({
+            url : "{:url('Role/postAccessData')}",
+            data : {
+                'type' : 'give',
+                'id' : id,
+                'nodeArr' : NodeArr
+            },
+            type:'post',
+            dataType : 'json',
+            success : function(res){
                 $('#role').css('display','none');
-                layer.msg(res.msg,{icon:1,time:1500,shade: 0.1}, function(){
-                    //Ajaxpage(1,5)
+                layer.close(index);
+                if(res.code == 1){
+                    
+                    layer.msg(res.msg,{icon:1,time:1500,shade: 0.1}, function(index){
+                        //Ajaxpage(1,5)
+                        layer.close(index);
+                    });
+                }else{
+                    layer.msg(res.msg,{icon:5,time:1500,shade:0.1},function(index){
+                        layer.close(index);
+                    });
+                }
+            },
+            error : function(res){
+                $('#role').css('display','none');
+                layer.close(index);
+                layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                    layer.close(index);   
                 });
-            }else{
-                layer.msg(res.msg);
             }
+        })
+        // $.post("{:url('Role/getAccessData')}", {'type' : 'give', 'id' : id, 'nodeArr' : NodeArr}, function(res){
+        //     layer.close(index);
+        //     if(res.code == 1){
+        //         $('#role').css('display','none');
+        //         layer.msg(res.msg,{icon:1,time:1500,shade: 0.1}, function(){
+        //             //Ajaxpage(1,5)
+        //         });
+        //     }else{
 
-        }, 'json')
+        //         layer.msg(res.msg);
+        //     }
+
+        // }, 'json')
     })
 </script>
 </body>

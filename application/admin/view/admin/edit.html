@@ -27,6 +27,7 @@
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" name="userEdit" id="userEdit" method="post" action="{:url('admin/update')}">
+                        {:token()}
                         <input type="hidden" name="id" value="{$admin.id}">
                         <div class="form-group">
                             <label class="col-sm-3 control-label">管理员名称：</label>
@@ -103,7 +104,6 @@
     var $list = $('#fileList');
     //上传图片,初始化WebUploader
     var uploader = WebUploader.create({
-     
         auto: true,// 选完文件后，是否自动上传。   
         swf: '/static/admin/webupload/Uploader.swf',// swf文件路径 
         server: "{:url('Upload/upload')}",// 文件接收服务端。
@@ -143,6 +143,7 @@
         $('#userEdit').ajaxForm({
             beforeSubmit: checkForm, 
             success: complete, 
+            error : error,
             dataType: 'json'
         });
         
@@ -190,9 +191,17 @@
                     window.location.href="{:url('Admin/index',['p' => $page])}";
                 });
             }else{
-                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1});
+                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                    layer.close(index);
+                });
                 return false;   
             }
+        }
+
+        function error(data){
+            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                layer.close(index);   
+            });
         }
      
     });

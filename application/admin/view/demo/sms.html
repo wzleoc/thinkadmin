@@ -20,7 +20,8 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <form class="form-horizontal" name="sms" id="sms" method="post" action="{:url('sms')}">
+                    <form class="form-horizontal" name="sms" id="sms" method="post" action="{:url('smsSend')}">
+                        {:token()}
                         <div class="form-group">
                             <label class="col-sm-3 control-label">手机号码：</label>
                             <div class="input-group col-sm-4">
@@ -62,7 +63,8 @@
         $('#sms').ajaxForm({
             beforeSubmit: checkForm, 
             success: complete, 
-            dataType: 'json'
+            dataType: 'json',
+            error : error
         });
         
         function checkForm(){
@@ -96,7 +98,7 @@
 
 
         function complete(data){
-            if(data.code=='OK'){
+            if(data.code == 'OK'){
                 layer.msg('发送成功', {icon: 1,time:2000,shade: 0.1}, function(index){
                     layer.close(index);
                 });
@@ -104,6 +106,12 @@
                 layer.msg(data.msg, {icon: 2,time:2000,shade: 0.1});
                 return false;   
             }
+        }
+
+        function error(data){
+            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                layer.close(index);   
+            });
         }
      
     });

@@ -1,60 +1,76 @@
 {include file="public/header" /}
 <body class="gray-bg">
-<div class="wrapper wrapper-content animated fadeInRight">
-    <!-- Panel Other -->
-    <div class="ibox float-e-margins">
-        <div class="ibox-title">
-            <h5>用户列表</h5>
-        </div>
-        <input type="hidden" name="page" id="page1" value="{$p}">
-        <div class="ibox-content">
-            <!--搜索框开始-->           
-            <div class="row">
-                <div class="col-sm-12">   
-                    <div  class="col-sm-2" style="width: 100px">
-                        <div class="input-group" >  
-                            <a href="{:url('admin/create')}"><button class="btn btn-outline btn-primary" type="button">添加用户</button></a> 
-                        </div>
-                    </div>                                            
-                    <form name="admin_list_sea" class="form-search" method="post" action="{:url('admin/index')}">
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" id="key" class="form-control" name="key" value="{$key}" placeholder="输入需查询的用户名" />   
-                                <span class="input-group-btn"> 
-                                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> 搜索</button> 
-                                </span>
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <!-- Panel Other -->
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>用户列表</h5>
+            </div>
+            <input id="page1" name="page" type="hidden" value="{$p}">
+                <div class="ibox-content">
+                    <!--搜索框开始-->
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="col-sm-2" style="width: 100px">
+                                <div class="input-group">
+                                    <a href="{:url('admin/create')}">
+                                        <button class="btn btn-outline btn-primary" type="button">
+                                            添加用户
+                                        </button>
+                                    </a>
+                                </div>
+                            </div>
+                            <form action="{:url('admin/index')}" class="form-search" method="post" name="admin_list_sea">
+                                <div class="col-sm-3">
+                                    <div class="input-group">
+                                        <input class="form-control" id="key" name="key" placeholder="输入需查询的用户名" type="text" value="{$key}"/>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="fa fa-search">
+                                                </i>
+                                                搜索
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="col-sm-2" style="width: 100px">
+                                <div class="input-group">
+                                    <a>
+                                        <button class="btn btn-outline btn-danger" id="delete" type="button">
+                                            批量删除
+                                        </button>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                    <div  class="col-sm-2" style="width: 100px">
-                        <div class="input-group" >  
-                            <a><button class="btn btn-outline btn-danger" type="button" id="delete">批量删除</button></a> 
-                        </div>
-                    </div>                    
+                    </div>
+                    <!--搜索框结束-->
+                    <div class="hr-line-dashed">
+                    </div>
+                    <table id="demo" lay-data="{id: 'idTest'}" lay-filter="test">
+                    </table>
+                    <!-- End Example Pagination -->
                 </div>
-            </div>
-            <!--搜索框结束-->
-            <div class="hr-line-dashed"></div>
-            
-            <table id="demo" lay-filter="test" lay-data="{id: 'idTest'}"></table>
-            <!-- End Example Pagination -->
+            </input>
         </div>
     </div>
-</div>
-<!-- End Panel Other -->
-</div>
-
+    <!-- End Panel Other -->
+</body>
 <!-- 加载动画 -->
 <div class="spiner-example">
     <div class="sk-spinner sk-spinner-three-bounce">
-        <div class="sk-bounce1"></div>
-        <div class="sk-bounce2"></div>
-        <div class="sk-bounce3"></div>
+        <div class="sk-bounce1">
+        </div>
+        <div class="sk-bounce2">
+        </div>
+        <div class="sk-bounce3">
+        </div>
     </div>
 </div>
-
 {include file="public/footer"}
 <script>
+    alert($('meta[name="csrf-token"]').attr('content'));
     layui.use('table', function(){
         var table = layui.table;
         var page = 1;
@@ -80,16 +96,27 @@
                 {fixed:'right',width:'20%', align:'center', toolbar: '#barDemo',title:'操作',unresize:true}
             ]],
             url: "{:url('Admin/getData')}",//后台请求的路径
-            where: {key: $('#key').val()}, //如果无需传递额外参数，可不加该参数
+            where: {
+                key: $('#key').val(),
+                __token__ : $('meta[name="csrf-token"]').attr('content')
+            }, //如果无需传递额外参数，可不加该参数
             method: 'get', //如果无需自定义HTTP类型，可不加该参数
             page: {
                 curr : "{$p}"
             }, //是否开启分页
             limit : {$list_rows}, // 请求条数
-            limits: [{$list_rows},1.5*{$list_rows},2*{$list_rows}], //变换请求条数
+            limits: [{$list_rows},Math.ceil(1.5*{$list_rows}),2*{$list_rows}], //变换请求条数
             //request: {} //如果无需自定义请求参数，可不加该参数
             //response: {} //如果无需自定义数据响应名称，可不加该参数
             done: function(res, curr, count){
+                if(res.code == -1){
+                    layer.msg('非法请求',{icon:4,time:1500,shade: 0.1},function(index){
+                        layer.close(index);   
+                    }); 
+                }
+                alert(res.csrftoken)
+                $('meta[name="csrf-token"]').attr('content',res.csrftoken)
+                alert($('meta[name="csrf-token"]').attr('content'))
                 page = curr; //得到当前页面
                 allPage = Math.ceil(count/this.limit);  // 算出总页数
                 limit = this.limit;
@@ -104,13 +131,11 @@
         });
         table.on('tool(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
             // console.log(obj); return false;
-
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event; //获得 lay-event 对应的值
             var tr = obj.tr; //获得当前行 tr 的DOM对象
             //var checkStatus = table.checkStatus('idTest');  可查看具体勾选项信息
             if(layEvent === 'detail'){ //查看
-                 
                 //console.log(checkStatus.data);
             } else if(layEvent === 'del'){ //删除
                 layer.confirm('真的删除行么', function(index){
@@ -138,20 +163,26 @@
                                         });
                                     }
                                 });
+                            }else{
+                                layer.msg(data.msg,{icon:2,time:1500},function(index){
+                                    layer.close(index);
+                                    table.reload('idTest', {     //指定容器唯一ID
+                                        url: "{:url('admin/getData')}",  // 后台请求路径
+                                        where: {key: $('#key').val()} //设定异步数据接口的额外参数
+                                    });
+                                })
                             }
                         },
                         error : function(){
-                            // layer.msg('无权删除',{icon:4,time:1500,shade: 0.1},function(index){
-                            //     layer.close(index);   
-                            // });
-                            //for laravel
+                            //   for laravel  for tp
+                            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                                layer.close(index);   
+                            });   
                         }
                     })
-                    //向服务端发送删除指令
                 });
             } else if(layEvent === 'edit'){ //编辑
                 location.href = '/admin/admin/edit/id/'+obj.data.id+'/page/'+page+'.html';
-                //同步更新缓存对应的值
             }
         });
         // 批量操作
@@ -193,12 +224,18 @@
                                     });
                                 }
                                 
+                            });   
+                        }else{
+                            layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                                layer.close(index);
                             });
-                            
+                            return false;
                         }
                     },
                     error : function(data){
-                        //layer.msg('无权访问',{icon:4,time:1500});  for laravel
+                        layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                            layer.close(index);   
+                        });
                     }
                 })
             })
@@ -222,7 +259,7 @@
                             where: {key: $('#key').val()} //设定异步数据接口的额外参数
                         });
                     });
-                }else{
+                }else if(data.code == 0){
                     var b='<span class="label label-info">开启</span>'
                     $('#zt'+id).html(b);
                     layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
@@ -234,21 +271,24 @@
                         });
                     });
                     return false;
+                }else{
+                    layer.msg('切换失败',{icon:2,time:1500,shade: 0.1,});
                 }
             },
             error : function(data){
-                //layer.msg('未通过验证',{icon:4,time:1500});   for laravel
+                layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                    layer.close(index);   
+                });
             }
         });
     }
 </script>
-<script type="text/html" id="barDemo">
+<script id="barDemo" type="text/html">
     <!-- <a class="btn btn-success btn-outline btn-xs" lay-event="detail"><i class="fa fa-eye"></i>查看</a>&nbsp;&nbsp; -->
     <a class="btn btn-primary btn-outline btn-xs" lay-event="edit"><i class="fa fa-paste"></i>编辑</a>&nbsp;&nbsp;
     <a class="btn btn-danger btn-outline btn-xs" lay-event="del"><i class="fa fa-trash-o"></i>删除</a>
-  
 </script>
-<script type="text/html" id="statusTpl">
+<script id="statusTpl" type="text/html">
     {{# if(d.status==1){ }}
         <a class="red" href="javascript:;" onclick="user_state({{d.id}});">
             <div id="zt{{d.id}}"><span class="label label-info">开启</span></div>
@@ -259,14 +299,9 @@
         </a>
     {{# } }}
 </script>
-
-<script type="text/html" id="roleTpl">
+<script id="roleTpl" type="text/html">
     {{d.role.role_name}}
 </script>
-
-<script type="text/html" id="avatarTpl">
+<script id="avatarTpl" type="text/html">
     <img src="{{d.avatar}}" width="38" class="img-circle" onerror="this.src = '/default.gif'">
 </script>
-
-</body>
-</html>

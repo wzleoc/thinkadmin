@@ -27,6 +27,7 @@
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" name="userAdd" id="userAdd" method="post" action="{:url('Admin/store')}">
+                        {:token()}
                         <div class="form-group">
                             <label class="col-sm-3 control-label">管理员名称：</label>
                             <div class="input-group col-sm-4">
@@ -144,7 +145,7 @@
             beforeSubmit: checkForm, 
             success: complete, 
             dataType: 'json',
-            error: err,
+            error: error,
         });
         
         function checkForm(){
@@ -197,12 +198,16 @@
                     window.location.href="{:url('Admin/index')}";
                 });
             }else{
-                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1});
+                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                    layer.close(index);
+                });
                 return false;   
             }
         }
-        function err(data){
-            layer.msg('未通过验证', {icon: 4,time:1500,shade: 0.1});
+        function error(data){
+            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+                layer.close(index);   
+            });
         }
      
     });

@@ -12,6 +12,10 @@ class Data extends Base
     /**
      * 数据备份首页
      */
+    protected $beforeActionList = [ 
+        
+    ];
+
     public function index()
     {
         $Db            = Db::connect();
