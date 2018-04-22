@@ -70,7 +70,15 @@
 </div>
 {include file="public/footer"}
 <script>
-    alert($('meta[name="csrf-token"]').attr('content'));
+    // $.ajax({
+    //     url : '/admin/gwgwg',
+    //     success : function(res){
+    //         console.log(res)
+    //     },
+    //     error : function(error){
+    //         console.log(error)
+    //     }
+    // })
     layui.use('table', function(){
         var table = layui.table;
         var page = 1;
@@ -98,7 +106,6 @@
             url: "{:url('Admin/getData')}",//后台请求的路径
             where: {
                 key: $('#key').val(),
-                __token__ : $('meta[name="csrf-token"]').attr('content')
             }, //如果无需传递额外参数，可不加该参数
             method: 'get', //如果无需自定义HTTP类型，可不加该参数
             page: {
@@ -109,14 +116,7 @@
             //request: {} //如果无需自定义请求参数，可不加该参数
             //response: {} //如果无需自定义数据响应名称，可不加该参数
             done: function(res, curr, count){
-                if(res.code == -1){
-                    layer.msg('非法请求',{icon:4,time:1500,shade: 0.1},function(index){
-                        layer.close(index);   
-                    }); 
-                }
-                alert(res.csrftoken)
-                $('meta[name="csrf-token"]').attr('content',res.csrftoken)
-                alert($('meta[name="csrf-token"]').attr('content'))
+                // this.where.token = $.cookie('token') 
                 page = curr; //得到当前页面
                 allPage = Math.ceil(count/this.limit);  // 算出总页数
                 limit = this.limit;
@@ -142,7 +142,10 @@
                     //obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
                     $.ajax({
                         url:"{:url('admin/delete')}",
-                        data : {id:obj.data.id},
+                        data : {
+                            id:obj.data.id,
+                            token : $.cookie('token')
+                        },
                         dataType : 'json',
                         type: 'get',
                         success : function( data ){
@@ -151,7 +154,9 @@
                                     if(Math.ceil(data.count/limit) < allPage){
                                         table.reload('idTest', {     //指定容器唯一ID
                                             url: "{:url('admin/getData')}",  // 后台请求路径
-                                            where: {key: $('#key').val()}, //设定异步数据接口的额外参数
+                                            where: {
+                                                key: $('#key').val(),
+                                            }, //设定异步数据接口的额外参数
                                             page : {
                                                 curr : allPage-1
                                             }
@@ -159,17 +164,16 @@
                                     }else{
                                         table.reload('idTest', {     //指定容器唯一ID
                                             url: "{:url('admin/getData')}",  // 后台请求路径
-                                            where: {key: $('#key').val()} //设定异步数据接口的额外参数
+                                            where: {
+                                                key: $('#key').val(),
+                                            }
                                         });
                                     }
                                 });
                             }else{
-                                layer.msg(data.msg,{icon:2,time:1500},function(index){
+                                layer.msg(data.msg,{icon:5,time:1500},function(index){
                                     layer.close(index);
-                                    table.reload('idTest', {     //指定容器唯一ID
-                                        url: "{:url('admin/getData')}",  // 后台请求路径
-                                        where: {key: $('#key').val()} //设定异步数据接口的额外参数
-                                    });
+                                    return false;
                                 })
                             }
                         },
@@ -203,7 +207,7 @@
                 $.ajax({
                     url:"{:url('admin/deleteMany')}",
                     type:'post',
-                    data:{'arrIds':arrIds},
+                    data:{'arrIds':arrIds,token : $.cookie('token')},
                     dataType: 'json',
                     success : function( data ){
                         if(data.code == 1){
@@ -244,7 +248,7 @@
     function user_state(id){
         $.ajax({
             url : "{:url('admin/status')}",
-            data : {id:id},
+            data : {id:id,token : $.cookie('token')},
             type : 'get',
             dataType : 'json',
             success : function(data){

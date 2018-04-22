@@ -21,7 +21,7 @@
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" name="sms" id="sms" method="post" action="{:url('smsSend')}">
-                        {:token()}
+                        <input type="hidden" name="token" id="token">
                         <div class="form-group">
                             <label class="col-sm-3 control-label">手机号码：</label>
                             <div class="input-group col-sm-4">
@@ -57,7 +57,9 @@
 {include file="public/footer" /}
 
 <script type="text/javascript">
-    
+    $(function(){
+        $('#token').val($.cookie('token'));
+    })
     //提交
     $(function(){
         $('#sms').ajaxForm({
@@ -98,6 +100,7 @@
 
 
         function complete(data){
+            $('#token').val($.cookie('token'));
             if(data.code == 'OK'){
                 layer.msg('发送成功', {icon: 1,time:2000,shade: 0.1}, function(index){
                     layer.close(index);
@@ -109,6 +112,7 @@
         }
 
         function error(data){
+            $('#token').val($.cookie('token'));
             layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
                 layer.close(index);   
             });

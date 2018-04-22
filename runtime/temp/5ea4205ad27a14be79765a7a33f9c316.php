@@ -1,4 +1,4 @@
-<?php /*a:3:{s:47:"D:\fix\application\admin\view\config\index.html";i:1524107542;s:48:"D:\fix\application\admin\view\public\header.html";i:1524218937;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524218932;}*/ ?>
+<?php /*a:3:{s:47:"D:\fix\application\admin\view\config\index.html";i:1524374950;s:48:"D:\fix\application\admin\view\public\header.html";i:1524236245;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524321632;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -80,8 +80,7 @@
                         </div>
                         <div class="panel-body">
                             <form action="<?php echo url('save'); ?>" method="post" class="form-horizontal" id="config">
-                                <input type="hidden" name="temp" value="手册写烂不得以">
-                                <?php echo token(); ?>
+                                <input type="hidden" name="token" id="token">
                                 <div class="tab-content">
                                     <div id="tab-1" class="tab-pane active">
                                         <div class="hr-line-dashed"></div>                                
@@ -258,28 +257,31 @@
 <script src="/static/admin/js/plugins/switchery/switchery.js"></script>
 <script src="/static/admin/js/jquery.form.js"></script>
 <script src="/static/admin/js/layer/layer.js"></script>
-<!--<script src="/static/admin/js/plugins/layer/laydate/laydate.js"></script> 
-<script src="/static/admin/js/laypage/laypage.js"></script>
-<script src="/static/admin/js/laytpl/laytpl.js"></script> -->
 <script src="/static/admin/js/artisan.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.0/jquery.cookie.js"></script>
 <script>
     $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
 </script>
 
 <script type="text/javascript">
+    $(function(){
+        $('#token').val($.cookie('token'));
+    })
     $('.btn_submit').click(function(){
         $('#config').ajaxForm({
             dataType: 'json',
             success: function(res){
+                $('#token').val($.cookie('token'));
                 if(res.code == 1){
                     artisan.success(res.msg , "<?php echo url('Config/index'); ?>");
                 }else{
-                    layer.msg(res.msg,{icon:5,time:1500,shade: 0.1},function(index){
+                    layer.msg(res.msg,{icon:5,time:1500,shade: 0.1},function(index){                       
                         layer.close(index);   
                     });
                 }  
             },
             error : function(error){
+                $('#token').val($.cookie('token'));
                 layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
                     layer.close(index);   
                 });

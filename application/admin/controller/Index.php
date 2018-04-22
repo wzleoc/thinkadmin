@@ -9,9 +9,9 @@ class Index extends Base
 {
     protected $beforeActionList = [ 
         // must use lowerCase try find answer with doc
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'updatepwd'
-        // ]
+        'shouldCheckCsrfToken' => [
+            'only' => 'updatepwd'
+        ]
     ];
 
     public function index()
@@ -56,5 +56,9 @@ class Index extends Base
             }
             
         }
+    }
+
+    public function httpNotFound(){
+        return view('404');
     }
 }

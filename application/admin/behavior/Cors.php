@@ -1,13 +1,22 @@
 <?php   
-namespace app\admin\behavior;   
+namespace app\admin\behavior;
 class Cors
 {  
-    public function responseSend()  
-    {    
-    	// 响应头设置 我们就是通过设置header来跨域的 这就主要代码了 定义行为只是为了前台每次请求都能走这段代码  
-        header('Access-Control-Allow-Origin:*');
-        header('Access-Control-Allow-Methods:*');    
-    	header('Access-Control-Allow-Headers:*');  
-    	header('Access-Control-Allow-Credentials:false');  
+	// 前后端完全分离的CORS且非简单请求（例如自定义header头信息）！！！
+	// 跨域共享
+    public function run()
+    {      
+    	if($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    		header('Access-Control-Allow-Origin:http://client.com');
+	        header('Access-Control-Allow-Methods:*');
+	    	header('Access-Control-Allow-Headers:token');  
+	    	header('Access-Control-Allow-Credentials:true'); 
+	    	exit();
+    	}else{
+    		header('Access-Control-Allow-Origin:http://client.com');
+	        header('Access-Control-Allow-Methods:*');
+	    	header('Access-Control-Allow-Headers:token');  
+	    	header('Access-Control-Allow-Credentials:true'); 
+    	}
     }
 } 

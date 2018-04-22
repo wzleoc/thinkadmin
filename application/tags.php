@@ -24,9 +24,7 @@ return [
     // 日志写入
     'log_write'    => [],
     // 应用结束
-    'app_end'      => [],
-    // 检测用户登录状态
-    'auth_check'   => ['app\\admin\\behavior\\Auth'],
-
-    'response_send' => ['app\\admin\\behavior\\Cors']
+    'app_end'      => ['app\\admin\\behavior\\SetToken'],
+    // 响应
+    'response_send' => []
 ];

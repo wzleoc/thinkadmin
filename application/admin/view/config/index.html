@@ -54,8 +54,7 @@
                         </div>
                         <div class="panel-body">
                             <form action="{:url('save')}" method="post" class="form-horizontal" id="config">
-                                <input type="hidden" name="temp" value="手册写烂不得以">
-                                {:token()}
+                                <input type="hidden" name="token" id="token">
                                 <div class="tab-content">
                                     <div id="tab-1" class="tab-pane active">
                                         <div class="hr-line-dashed"></div>                                
@@ -226,19 +225,24 @@
 {include file="public/footer" /}
 
 <script type="text/javascript">
+    $(function(){
+        $('#token').val($.cookie('token'));
+    })
     $('.btn_submit').click(function(){
         $('#config').ajaxForm({
             dataType: 'json',
             success: function(res){
+                $('#token').val($.cookie('token'));
                 if(res.code == 1){
                     artisan.success(res.msg , "{:url('Config/index')}");
                 }else{
-                    layer.msg(res.msg,{icon:5,time:1500,shade: 0.1},function(index){
+                    layer.msg(res.msg,{icon:5,time:1500,shade: 0.1},function(index){                       
                         layer.close(index);   
                     });
                 }  
             },
             error : function(error){
+                $('#token').val($.cookie('token'));
                 layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
                     layer.close(index);   
                 });

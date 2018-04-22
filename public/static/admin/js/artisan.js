@@ -32,7 +32,8 @@ var artisan = {
 
     //状态
     status : function(id,url){
-	    $.post(url,{id:id},function(data){	         
+	    $.post(url,{id:id,token:$.cookie('token')},function(data){	
+	    	$('.token').val($.cookie('token'))
 	        if(data.code==1){
 	            var a='<span class="label label-danger">禁用</span>'
 	            $('#zt'+id).html(a);
@@ -47,6 +48,4 @@ var artisan = {
 	    });
 	    return false;
 	}
-
-
 }

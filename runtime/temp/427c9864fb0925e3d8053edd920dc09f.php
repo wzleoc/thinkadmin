@@ -1,4 +1,4 @@
-<?php /*a:3:{s:46:"D:\fix\application\admin\view\admin\index.html";i:1524194277;s:48:"D:\fix\application\admin\view\public\header.html";i:1524218937;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524218932;}*/ ?>
+<?php /*a:3:{s:46:"D:\fix\application\admin\view\admin\index.html";i:1524381856;s:48:"D:\fix\application\admin\view\public\header.html";i:1524236245;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524321632;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -103,15 +103,21 @@
 <script src="/static/admin/js/plugins/switchery/switchery.js"></script>
 <script src="/static/admin/js/jquery.form.js"></script>
 <script src="/static/admin/js/layer/layer.js"></script>
-<!--<script src="/static/admin/js/plugins/layer/laydate/laydate.js"></script> 
-<script src="/static/admin/js/laypage/laypage.js"></script>
-<script src="/static/admin/js/laytpl/laytpl.js"></script> -->
 <script src="/static/admin/js/artisan.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.0/jquery.cookie.js"></script>
 <script>
     $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
 </script>
 <script>
-    alert($('meta[name="csrf-token"]').attr('content'));
+    // $.ajax({
+    //     url : '/admin/gwgwg',
+    //     success : function(res){
+    //         console.log(res)
+    //     },
+    //     error : function(error){
+    //         console.log(error)
+    //     }
+    // })
     layui.use('table', function(){
         var table = layui.table;
         var page = 1;
@@ -139,7 +145,6 @@
             url: "<?php echo url('Admin/getData'); ?>",//后台请求的路径
             where: {
                 key: $('#key').val(),
-                __token__ : $('meta[name="csrf-token"]').attr('content')
             }, //如果无需传递额外参数，可不加该参数
             method: 'get', //如果无需自定义HTTP类型，可不加该参数
             page: {
@@ -150,14 +155,7 @@
             //request: {} //如果无需自定义请求参数，可不加该参数
             //response: {} //如果无需自定义数据响应名称，可不加该参数
             done: function(res, curr, count){
-                if(res.code == -1){
-                    layer.msg('非法请求',{icon:4,time:1500,shade: 0.1},function(index){
-                        layer.close(index);   
-                    }); 
-                }
-                alert(res.csrftoken)
-                $('meta[name="csrf-token"]').attr('content',res.csrftoken)
-                alert($('meta[name="csrf-token"]').attr('content'))
+                // this.where.token = $.cookie('token') 
                 page = curr; //得到当前页面
                 allPage = Math.ceil(count/this.limit);  // 算出总页数
                 limit = this.limit;
@@ -183,7 +181,10 @@
                     //obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
                     $.ajax({
                         url:"<?php echo url('admin/delete'); ?>",
-                        data : {id:obj.data.id},
+                        data : {
+                            id:obj.data.id,
+                            token : $.cookie('token')
+                        },
                         dataType : 'json',
                         type: 'get',
                         success : function( data ){
@@ -192,7 +193,9 @@
                                     if(Math.ceil(data.count/limit) < allPage){
                                         table.reload('idTest', {     //指定容器唯一ID
                                             url: "<?php echo url('admin/getData'); ?>",  // 后台请求路径
-                                            where: {key: $('#key').val()}, //设定异步数据接口的额外参数
+                                            where: {
+                                                key: $('#key').val(),
+                                            }, //设定异步数据接口的额外参数
                                             page : {
                                                 curr : allPage-1
                                             }
@@ -200,17 +203,16 @@
                                     }else{
                                         table.reload('idTest', {     //指定容器唯一ID
                                             url: "<?php echo url('admin/getData'); ?>",  // 后台请求路径
-                                            where: {key: $('#key').val()} //设定异步数据接口的额外参数
+                                            where: {
+                                                key: $('#key').val(),
+                                            }
                                         });
                                     }
                                 });
                             }else{
-                                layer.msg(data.msg,{icon:2,time:1500},function(index){
+                                layer.msg(data.msg,{icon:5,time:1500},function(index){
                                     layer.close(index);
-                                    table.reload('idTest', {     //指定容器唯一ID
-                                        url: "<?php echo url('admin/getData'); ?>",  // 后台请求路径
-                                        where: {key: $('#key').val()} //设定异步数据接口的额外参数
-                                    });
+                                    return false;
                                 })
                             }
                         },
@@ -244,7 +246,7 @@
                 $.ajax({
                     url:"<?php echo url('admin/deleteMany'); ?>",
                     type:'post',
-                    data:{'arrIds':arrIds},
+                    data:{'arrIds':arrIds,token : $.cookie('token')},
                     dataType: 'json',
                     success : function( data ){
                         if(data.code == 1){
@@ -285,7 +287,7 @@
     function user_state(id){
         $.ajax({
             url : "<?php echo url('admin/status'); ?>",
-            data : {id:id},
+            data : {id:id,token : $.cookie('token')},
             type : 'get',
             dataType : 'json',
             success : function(data){

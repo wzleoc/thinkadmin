@@ -5,11 +5,13 @@ use think\Exception;
 
 class BaseException extends Exception
 {
-	public $status = 400;
-    public $code   = -1;
-    public $msg    = '非法请求';
-	public function __construct($msg = '非法请求'){
+	public $status;
+    public $code;
+    public $msg;
+	public function __construct($msg = '请求参数错误',$code = -1 , $status = 400){
 		parent::__construct();
 		$this->msg = $msg;
+		$this->code = $code;
+		$this->status = $status;
 	}    
 }

@@ -6,17 +6,17 @@ use app\admin\model\Admin as AdminModel;
 use app\admin\model\Role;
 use app\admin\validate\AdminStoreValidate;
 use app\admin\validate\AdminUpdateValidate;
-use app\admin\validate\ShouldCheckCsrfValidate;
 use app\lib\exception\BaseException;
 use think\Request;
+use think\Container;
 
 class Admin extends Base
 {
     protected $beforeActionList = [ 
-        // must use lowerCase try find answer with doc
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'store,update,delete,status,deletemany,getdata'
-        // ]
+        //小写方法名
+        'shouldCheckCsrfToken' => [
+            'only' => 'store,update,delete,status,deletemany'
+        ]
     ];
 
     public function index(Request $request)
@@ -40,7 +40,7 @@ class Admin extends Base
         $count   = count($lists);
         $allPage = (int) ceil($count / $limits);
         $data    = page($nowPage, $limits, $allPage, $lists);
-        return json(["code" => 0, "msg" => "", "count" => $count, 'data' => $data,'csrftoken' => session('csrftoken')]);
+        return json(["code" => 0, "msg" => "", "count" => $count, 'data' => $data]);
     }
 
     public function create()

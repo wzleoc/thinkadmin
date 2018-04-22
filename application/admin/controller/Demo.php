@@ -8,9 +8,9 @@ class Demo extends Base
 {
     protected $beforeActionList = [ 
         // must use lowerCase try find answer with doc
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'smsSend'
-        // ]
+        'shouldCheckCsrfToken' => [
+            'only' => 'smsSend'
+        ]
     ];
 
     public function smsSend(Request $request, SmsSendValidate $validate)

@@ -12,14 +12,18 @@ use think\Request;
 class Role extends Base
 {
     protected $beforeActionList = [ 
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'store,update,delete,postaccessdata,getroledata'
-        // ]
+        'shouldCheckCsrfToken' => [
+            'only' => 'store,update,delete,postaccessdata'
+        ]
     ]; 
     
     public function index(Request $request)
     {
-        return view('index', ['key' => input('key', ''), 'limits' => $this->limits]);
+        return view('index', [
+            'key' => input('key', ''), 
+            'limits' => $this->limits,
+            'p'   => input('p',1),
+        ]);
     }
 
     public function getRoleData(Request $request)
@@ -51,9 +55,12 @@ class Role extends Base
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request)
     {
-        return view('edit', ['role' => RoleModel::get($id)]);
+        return view('edit', [
+            'role' => RoleModel::get(input('id')),
+            'p'  => input('p')
+        ]);
     }
 
     public function update(Request $request, RoleUpdateValidate $validate)
@@ -78,14 +85,30 @@ class Role extends Base
         }
         if (RoleModel::destroy($request->get('id'))) {
             if (false !== Admin::where(['role_id' => $request->get('id')])->update(['role_id' => 0])) {
-                return json(['code' => 1, 'msg' => '删除角色成功']);
+                return json([
+                    'code' => 1, 
+                    'msg' => '删除角色成功',
+                    'allPage' => (int)ceil(RoleModel::count() / $this->limits)
+                ]);
             }else{
-                return json(['code' => 0 , 'msg' => '删除角色失败']);
+                return json([
+                    'code' => 0 , 
+                    'msg' => '删除角色失败',
+                    'allPage' => (int)ceil(RoleModel::count() / $this->limits)
+                ]);
             }
         }else{
-            return json(['code' => 0 , 'msg' => '删除角色失败']);
+            return json([
+                'code' => 0 , 
+                'msg' => '删除角色失败',
+                'allPage' => (int)ceil(RoleModel::count() / $this->limits)
+            ]);
         }
-        return json(['code' => 0, 'msg' => '删除失败']);
+        return json([
+            'code' => 0, 
+            'msg' => '删除角色失败',
+            'allPage' => (int)ceil(RoleModel::count() / $this->limits)
+        ]);
     }
     
     public function getAccessData(Request $request)
@@ -104,7 +127,7 @@ class Role extends Base
         $role = RoleModel::get($request->param('id'));
         if ('give' == $request->post('type')) {
             $role->nodes()->detach();
-            if ($request->post('nodeArr/a')) {
+            if ($nodeArr = $request->post('nodeArr/a')) {
                 foreach ($nodeArr as $k => $v) {
                     $nodeArr[$k] = (int) $v;
                 }

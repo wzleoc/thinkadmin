@@ -1,4 +1,4 @@
-<?php /*a:3:{s:46:"D:\fix\application\admin\view\index\index.html";i:1524031161;s:48:"D:\fix\application\admin\view\public\header.html";i:1524218937;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524218932;}*/ ?>
+<?php /*a:3:{s:46:"D:\fix\application\admin\view\index\index.html";i:1524236245;s:48:"D:\fix\application\admin\view\public\header.html";i:1524236245;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524321632;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -130,10 +130,8 @@
 <script src="/static/admin/js/plugins/switchery/switchery.js"></script>
 <script src="/static/admin/js/jquery.form.js"></script>
 <script src="/static/admin/js/layer/layer.js"></script>
-<!--<script src="/static/admin/js/plugins/layer/laydate/laydate.js"></script> 
-<script src="/static/admin/js/laypage/laypage.js"></script>
-<script src="/static/admin/js/laytpl/laytpl.js"></script> -->
 <script src="/static/admin/js/artisan.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.0/jquery.cookie.js"></script>
 <script>
     $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
 </script>

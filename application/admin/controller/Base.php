@@ -2,14 +2,13 @@
 
 namespace app\admin\controller;
 
+use think\Controller;
 use app\admin\model\Admin;
 use app\admin\model\Config;
 use app\admin\model\Role;
-use think\Controller;
-use app\admin\validate\ShouldCheckCsrfValidate;
 use app\lib\exception\BaseException;
 use think\Request;
-
+use think\facade\Log;
 
 class Base extends Controller
 {
@@ -17,9 +16,7 @@ class Base extends Controller
 
     public function initialize()
     {
-        \think\facade\Hook::listen('response_send');
         $this->limits = Config::where(['name' => 'list_rows'])->value('value');
-        cookie('token',session('csrftoken'));
         if (!$this->authCheck()) {
             if (request()->isAjax()) {
                 https(401);
@@ -35,7 +32,6 @@ class Base extends Controller
     }
     private function authCheck()
     {
-        $this->shouldCheckCsrfToken();
         if (!session('admin') || session('admin.status') == 0) {
             $this->redirect('login/index');
         }
@@ -59,6 +55,7 @@ class Base extends Controller
                 }
                 return true;
             }
+            return true;
         }
         return true;
     }
@@ -84,15 +81,25 @@ class Base extends Controller
 
     protected function shouldCheckCsrfToken()
     {
-        // dump(cookie('token'));
-        // dump('我进来了');die;
-        // dump(request()->header());die;
-        // if(!request()->param('token')){
-        //     throw new BaseException('非法请求！！');
-        // }
-        if(cookie('token') != session('csrftoken')){
-            throw new BaseException('非法请求！！');
+        if(input('token') != session('csrftoken')){
+            if('http://' . request()->header('host') != request()->header('origin') && 'https://' . request()->header('host') != request()->header('origin')){
+                Log::write([
+                    'header' => request()->header(),
+                    'ip'     => request()->ip()
+                ],'Csrf');
+                throw new BaseException('非法跨域请求攻击！我们不会坐以待毙！');
+                // DDOS反击？
+            }else{
+                if(config()['app']['app_debug']){
+                    throw new BaseException('校验token不通过');    
+                }else{
+                    throw new BaseException('请关闭调试模式');
+                }    
+            }    
         }
     }
+
+
+
 
 }

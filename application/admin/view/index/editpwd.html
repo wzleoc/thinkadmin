@@ -11,7 +11,7 @@
                     </div>
                     <div class="ibox-content">
                         <form action="{:url('Index/updatepwd')}" class="form-horizontal" id="editPwd" method="post" name="editPwd">
-                            {:token()}
+                            <input type="hidden" name="token" id="token">
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">
                                     当前密码：
@@ -79,6 +79,7 @@
     <script type="text/javascript">
     //编辑密码
     $(function(){
+        $('#token').val($.cookie('token'));
         $('#editPwd').ajaxForm({
             beforeSubmit: checkForm, 
             success: complete, 
@@ -109,6 +110,7 @@
         }
 
         function complete(data){
+            $('#token').val($.cookie('token'));
             if(data.code==1){
                 layer.msg(data.msg,{icon: 1,time:2000,shade: 0.1},function(index){
                     window.history.back(-1);
@@ -122,6 +124,7 @@
         }
 
         function error(error){
+            $('#token').val($.cookie('token'));
             layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
                 layer.close(index);   
             });

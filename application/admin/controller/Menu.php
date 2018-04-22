@@ -4,7 +4,6 @@ namespace app\admin\controller;
 
 use app\admin\model\Node;
 use app\admin\model\NodeRole;
-use app\admin\validate\MenuOrderValidate;
 use app\admin\validate\MenuStoreValidate;
 use app\admin\validate\MenuUpdateValidate;
 use think\Request;
@@ -13,9 +12,9 @@ class Menu extends Base
 {
     protected $beforeActionList = [ 
         // must use lowerCase try find answer with doc
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'menustore,update,delete,order,status'
-        // ]
+        'shouldCheckCsrfToken' => [
+            'only' => 'menustore,update,delete,order,status'
+        ]
     ];
     public function index()
     {
@@ -75,12 +74,9 @@ class Menu extends Base
         }    
     }
 
-    public function order(Request $request, MenuOrderValidate $validate)
+    public function order(Request $request)
     {
         $param = $request->post();
-        if (!$validate->check($param)) {
-            return ['code' => 0, 'msg' => $validate->getError()];
-        }
         $status = true;
         foreach ($param as $id => $sort) {
             if (false === Node::where('id', $id)->update(['sort' => $sort])) {

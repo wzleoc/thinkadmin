@@ -1,4 +1,4 @@
-<?php /*a:1:{s:40:"D:\fix\application\admin\view\index.html";i:1524216021;}*/ ?>
+<?php /*a:1:{s:40:"D:\fix\application\admin\view\index.html";i:1524236245;}*/ ?>
 <link href="/static/admin/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
 <link href="/static/admin/css/font-awesome.min.css?v=4.4.0" rel="stylesheet">
 <link href="/static/admin/css/animate.min.css" rel="stylesheet">

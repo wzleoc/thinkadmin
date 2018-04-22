@@ -1,4 +1,4 @@
-<?php /*a:3:{s:45:"D:\fix\application\admin\view\menu\index.html";i:1524109168;s:48:"D:\fix\application\admin\view\public\header.html";i:1524218937;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524218932;}*/ ?>
+<?php /*a:3:{s:45:"D:\fix\application\admin\view\menu\index.html";i:1524384360;s:48:"D:\fix\application\admin\view\public\header.html";i:1524236245;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524321632;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -45,8 +45,7 @@
             <div class="example-wrap">
                 <div class="example">
                     <form id="ruleorder" name="ruleorder" method="post" action="<?php echo url('order'); ?>" >
-                        <input type="hidden" name="temp" value="手册写烂不得以">
-                        <?php echo token(); ?>
+                        <input type="hidden" name="token" class="token">
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr class="long-tr">
@@ -113,10 +112,8 @@
 <script src="/static/admin/js/plugins/switchery/switchery.js"></script>
 <script src="/static/admin/js/jquery.form.js"></script>
 <script src="/static/admin/js/layer/layer.js"></script>
-<!--<script src="/static/admin/js/plugins/layer/laydate/laydate.js"></script> 
-<script src="/static/admin/js/laypage/laypage.js"></script>
-<script src="/static/admin/js/laytpl/laytpl.js"></script> -->
 <script src="/static/admin/js/artisan.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.0/jquery.cookie.js"></script>
 <script>
     $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
 </script>
@@ -128,8 +125,8 @@
                     <h3 class="modal-title">添加菜单</h3>                  
                 </div>
                 <form class="form-horizontal" name="add_rule" id="add_rule" method="post" action="<?php echo url('Menu/MenuStore'); ?>">
-                    <?php echo token(); ?>
-                    <div class="ibox-content">
+                    <input type="hidden" name="token" class="token">
+                        <div class="ibox-content">
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">所属父级</label>
                                 <div class="col-sm-8">                                                      
@@ -192,52 +189,53 @@
     </div>
 
 <script type="text/javascript">
-   
     $(function(){
-        $('#add_rule').ajaxForm({
-            beforeSubmit: checkForm, 
-            success: complete, 
-            error : error,
-            dataType: 'json'
-        });
-        
-        function checkForm(){
-            if( '' == $.trim($('#title').val())){
-                layer.msg('请输入菜单名称',{icon:2,time:1500,shade: 0.1}, function(index){
-                    layer.close(index);
-                });
-                return false;
-            }
-            
-            if( '' == $.trim($('#name').val())){
-                layer.msg('控制器/方法不能为空',{icon:0,time:1500,shade: 0.1}, function(index){
-                    layer.close(index);
-                });
-                return false;
-            }
-        }
-
-
-        function complete(data){
-            if(data.code==1){
-                layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
-                    window.location.href="<?php echo url('Menu/index'); ?>";
-                });
-            }else{
-                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
-                    layer.close(index);
-                });
-                return false;   
-            }
-        }
-
-        function error(data){
-            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
-                layer.close(index);   
-            });
-        }
-     
+        $('.token').val($.cookie('token'));
+    })
+    $('#add_rule').ajaxForm({
+        beforeSubmit: checkForm, 
+        success: complete, 
+        error : error,
+        dataType: 'json'
     });
+    
+    function checkForm(){
+        if( '' == $.trim($('#title').val())){
+            layer.msg('请输入菜单名称',{icon:2,time:1500,shade: 0.1}, function(index){
+                layer.close(index);
+            });
+            return false;
+        }
+        
+        if( '' == $.trim($('#name').val())){
+            layer.msg('控制器/方法不能为空',{icon:0,time:1500,shade: 0.1}, function(index){
+                layer.close(index);
+            });
+            return false;
+        }
+    }
+
+
+    function complete(data){
+        $('.token').val($.cookie('token'))
+        if(data.code==1){
+            layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
+                window.location.href="<?php echo url('Menu/index'); ?>";
+            });
+        }else{
+            layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                layer.close(index);
+            });
+            return false;   
+        }
+    }
+
+    function error(data){
+        layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+            layer.close(index);   
+        });
+    }
+     
 
 
     //更新排序
@@ -248,6 +246,7 @@
         });
 
         function complete(data){
+            $('.token').val($.cookie('token'))
             if(data.code==1){
                 layer.msg(data.msg, {icon: 1,time:1500,shade: 0.1}, function(index){
                     window.location.href="<?php echo url('menu/index'); ?>";
@@ -264,7 +263,8 @@
 function del_rule(id){
     layer.confirm('确认删除此菜单?', {icon: 3, title:'提示'}, function(index){
         //do something
-        $.getJSON("<?php echo url('Menu/delete'); ?>", {'id' : id}, function(res){
+        $.getJSON("<?php echo url('Menu/delete'); ?>", {id : id, token : $.cookie('token')}, function(res){
+            $('.token').val($.cookie('token'))
             if(res.code == 1){
                 layer.msg(res.msg,{icon:1,time:1500,shade: 0.1},function(index){
                     layer.close(index);

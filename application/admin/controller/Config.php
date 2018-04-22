@@ -8,10 +8,10 @@ use think\Request;
 class Config extends Base
 {
     protected $beforeActionList = [ 
-        // must use lowerCase try find answer with doc
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'save'
-        // ]
+        //小写方法名
+        'shouldCheckCsrfToken' => [
+            'only' => 'save'
+        ]
     ];
     public function index()
     {
@@ -27,9 +27,6 @@ class Config extends Base
      */
     public function save($config)
     {
-        if(!$validate->check($request->post())){
-            return json(['code' => 0, 'msg' => $validate->getError()]); 
-        }
         $configModel = new ConfigModel();
         $status = true;
         if ($config && is_array($config)) {

@@ -27,7 +27,7 @@
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" name="userEdit" id="userEdit" method="post" action="{:url('admin/update')}">
-                        {:token()}
+                        <input type="hidden" name="token" id="token">
                         <input type="hidden" name="id" value="{$admin.id}">
                         <div class="form-group">
                             <label class="col-sm-3 control-label">管理员名称：</label>
@@ -101,6 +101,11 @@
 {include file="public/footer" /}
 <script type="text/javascript" src="/static/admin/webupload/webuploader.min.js"></script>
 <script type="text/javascript">
+    $(function(){
+        $('#token').val($.cookie('token'));
+    }) 
+</script>
+<script type="text/javascript">
     var $list = $('#fileList');
     //上传图片,初始化WebUploader
     var uploader = WebUploader.create({
@@ -117,6 +122,7 @@
         },
 
         'onUploadSuccess': function(file, data, response) {
+            $('#token').val($.cookie('token'));
             $("#data_photo").val(data._raw);
             $("#img_data").attr('src',data._raw);
         }
@@ -154,12 +160,6 @@
                 });
                 return false;
             }
-            if($.trim($('#username').val()).length < 6){
-                layer.msg('用户名不小于六位',{icon:2,time:1500,shade: 0.1}, function(index){
-                layer.close(index);
-                });
-                return false;
-            }
             if( '' == $.trim($('#role_id').val())){
                 layer.msg('请选择用户角色',{icon:2,time:1500,shade: 0.1}, function(index){
                 layer.close(index);
@@ -186,6 +186,7 @@
 
 
         function complete(data){
+            $('#token').val($.cookie('token'));
             if(data.code == 1){
                 layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
                     window.location.href="{:url('Admin/index',['p' => $page])}";
@@ -199,6 +200,7 @@
         }
 
         function error(data){
+            $('#token').val($.cookie('token'));
             layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
                 layer.close(index);   
             });

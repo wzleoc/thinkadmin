@@ -19,8 +19,7 @@
             <div class="example-wrap">
                 <div class="example">
                     <form id="ruleorder" name="ruleorder" method="post" action="{:url('order')}" >
-                        <input type="hidden" name="temp" value="手册写烂不得以">
-                        {:token()}
+                        <input type="hidden" name="token" class="token">
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr class="long-tr">
@@ -87,8 +86,8 @@
                     <h3 class="modal-title">添加菜单</h3>                  
                 </div>
                 <form class="form-horizontal" name="add_rule" id="add_rule" method="post" action="{:url('Menu/MenuStore')}">
-                    {:token()}
-                    <div class="ibox-content">
+                    <input type="hidden" name="token" class="token">
+                        <div class="ibox-content">
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">所属父级</label>
                                 <div class="col-sm-8">                                                      
@@ -151,52 +150,53 @@
     </div>
 
 <script type="text/javascript">
-   
     $(function(){
-        $('#add_rule').ajaxForm({
-            beforeSubmit: checkForm, 
-            success: complete, 
-            error : error,
-            dataType: 'json'
-        });
-        
-        function checkForm(){
-            if( '' == $.trim($('#title').val())){
-                layer.msg('请输入菜单名称',{icon:2,time:1500,shade: 0.1}, function(index){
-                    layer.close(index);
-                });
-                return false;
-            }
-            
-            if( '' == $.trim($('#name').val())){
-                layer.msg('控制器/方法不能为空',{icon:0,time:1500,shade: 0.1}, function(index){
-                    layer.close(index);
-                });
-                return false;
-            }
-        }
-
-
-        function complete(data){
-            if(data.code==1){
-                layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
-                    window.location.href="{:url('Menu/index')}";
-                });
-            }else{
-                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
-                    layer.close(index);
-                });
-                return false;   
-            }
-        }
-
-        function error(data){
-            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
-                layer.close(index);   
-            });
-        }
-     
+        $('.token').val($.cookie('token'));
+    })
+    $('#add_rule').ajaxForm({
+        beforeSubmit: checkForm, 
+        success: complete, 
+        error : error,
+        dataType: 'json'
     });
+    
+    function checkForm(){
+        if( '' == $.trim($('#title').val())){
+            layer.msg('请输入菜单名称',{icon:2,time:1500,shade: 0.1}, function(index){
+                layer.close(index);
+            });
+            return false;
+        }
+        
+        if( '' == $.trim($('#name').val())){
+            layer.msg('控制器/方法不能为空',{icon:0,time:1500,shade: 0.1}, function(index){
+                layer.close(index);
+            });
+            return false;
+        }
+    }
+
+
+    function complete(data){
+        $('.token').val($.cookie('token'))
+        if(data.code==1){
+            layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
+                window.location.href="{:url('Menu/index')}";
+            });
+        }else{
+            layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                layer.close(index);
+            });
+            return false;   
+        }
+    }
+
+    function error(data){
+        layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+            layer.close(index);   
+        });
+    }
+     
 
 
     //更新排序
@@ -207,6 +207,7 @@
         });
 
         function complete(data){
+            $('.token').val($.cookie('token'))
             if(data.code==1){
                 layer.msg(data.msg, {icon: 1,time:1500,shade: 0.1}, function(index){
                     window.location.href="{:url('menu/index')}";
@@ -223,7 +224,8 @@
 function del_rule(id){
     layer.confirm('确认删除此菜单?', {icon: 3, title:'提示'}, function(index){
         //do something
-        $.getJSON("{:url('Menu/delete')}", {'id' : id}, function(res){
+        $.getJSON("{:url('Menu/delete')}", {id : id, token : $.cookie('token')}, function(res){
+            $('.token').val($.cookie('token'))
             if(res.code == 1){
                 layer.msg(res.msg,{icon:1,time:1500,shade: 0.1},function(index){
                     layer.close(index);

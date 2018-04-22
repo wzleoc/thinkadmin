@@ -20,7 +20,7 @@
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" name="roleEdit" id="roleEdit" method="post" action="{:url('Role/update')}">
-                        {:token()}
+                        <input type="hidden" name="token" id="token">
                         <input type="hidden" value="{$role.id}" name="id"/>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">角色名称：</label>
@@ -32,7 +32,7 @@
                         <div class="form-group">
                             <div class="col-sm-4 col-sm-offset-3">
                                 <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> 保存</button>&nbsp;&nbsp;&nbsp;
-                                <a class="btn btn-danger" href="javascript:history.go(-1);"><i class="fa fa-close"></i> 返回</a>
+                                <a class="btn btn-danger" href="{:url('Role/index',['p' => $p])}"><i class="fa fa-close"></i> 返回</a>
                             </div>
                         </div>
                     </form>
@@ -44,47 +44,49 @@
 </div>
 {include file="public/footer" /}
 <script type="text/javascript">
-
-
     $(function(){
-        $('#roleEdit').ajaxForm({
-            beforeSubmit: checkForm, 
-            success: complete, 
-            error : error,
-            dataType: 'json'
-        });
-        
-        function checkForm(){
-            if( '' == $.trim($('#title').val())){
-                layer.msg('请输入角色名称',{icon:2,time:1500,shade: 0.1}, function(index){
-                    layer.close(index);
-                });
-                return false;
-            }
-        }
+        $('#token').val($.cookie('token'));
+    })
 
-
-        function complete(data){
-            if(data.code==1){
-                layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
-                    window.location.href="{:url('role/index')}";
-                });
-            }else{
-                layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
-                    layer.close(index);
-                });
-                return false;   
-            }
-        }
-
-        function error(data){
-            layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
-                layer.close(index);   
+    $('#roleEdit').ajaxForm({
+        beforeSubmit: checkForm, 
+        success: complete, 
+        error : error,
+        dataType: 'json'
+    });
+    
+    function checkForm(){
+        if( '' == $.trim($('#title').val())){
+            layer.msg('请输入角色名称',{icon:2,time:1500,shade: 0.1}, function(index){
+                layer.close(index);
             });
             return false;
         }
+    }
+
+
+    function complete(data){
+        $('#token').val($.cookie('token'));
+        if(data.code==1){
+            layer.msg(data.msg, {icon: 6,time:1500,shade: 0.1}, function(index){
+                window.location.href="{:url('role/index',['p' => $p])}";
+            });
+        }else{
+            layer.msg(data.msg, {icon: 5,time:1500,shade: 0.1},function(index){
+                layer.close(index);
+            });
+            return false;   
+        }
+    }
+
+    function error(data){
+        $('#token').val($.cookie('token'));
+        layer.msg('无权访问',{icon:4,time:1500,shade: 0.1},function(index){
+            layer.close(index);   
+        });
+        return false;
+    }
      
-    });
 
 
 

@@ -11,14 +11,12 @@ use app\lib\exception\BaseException;
 
 class Login extends Controller
 {
-    protected $beforeActionList = [ 
-        // 'shouldCheckCsrfToken' => [
-        //     'only' => 'dologin,logout'
-        // ]
-    ];
 
     public function index()
     {
+        if(session('?admin')){
+            return redirect('admin/index/index');
+        }
         return view('index', ['verify_type' => config('admin.verify_type')]);
     }
 
@@ -28,7 +26,6 @@ class Login extends Controller
             return ['code' => 0, 'msg' => $validate->getError()];
         }
         return json(Admin::checkLogin($request));
-        // return json(Admin::checkLogin($request))->header('token',session('csrftoken'));
     }
 
     public function logout()

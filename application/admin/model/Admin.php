@@ -19,9 +19,6 @@ class Admin extends Model
         $password = $request->post('password');
         if($admin = self::where(['name'=>$username,'password'=>md5(md5($password))])->find()){
             session('admin',$admin);
-            session('csrftoken',md5($admin->id . 'LaravelForever' . mt_rand(0,99999)));
-            // header('Cache-control', 'no-cache,must-revalidate');
-            // header('token',session('csrftoken'));
             return ['code' => 1 , 'msg' => '登录成功' , 'url'=>url('admin/index/index')];
         }
         return ['code' => 2, 'msg' => '账户密码错误'];

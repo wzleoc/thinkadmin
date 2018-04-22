@@ -1,4 +1,4 @@
-<?php /*a:1:{s:46:"D:\fix\application\admin\view\login\index.html";i:1524220978;}*/ ?>
+<?php /*a:1:{s:46:"D:\fix\application\admin\view\login\index.html";i:1524321668;}*/ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,13 +60,7 @@
 <script type="text/javascript" src="/static/admin/js/layer/layer.js"></script>
 <script type="text/javascript" src="/static/admin/js/artisan.js"></script> 
 <script type="text/javascript" src="/static/admin/js/jquery.slider.min.js"></script>
-<!-- <script type="text/javascript">
-    $.ajaxSetup({
-        data : {
-            '__token__' : $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-</script> -->
+
 <script type="text/javascript">
 
     var check_result = false;

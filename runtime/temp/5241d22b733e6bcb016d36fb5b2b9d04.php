@@ -1,4 +1,4 @@
-<?php /*a:3:{s:45:"D:\fix\application\admin\view\role\index.html";i:1524185758;s:48:"D:\fix\application\admin\view\public\header.html";i:1524218937;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524218932;}*/ ?>
+<?php /*a:3:{s:45:"D:\fix\application\admin\view\role\index.html";i:1524374097;s:48:"D:\fix\application\admin\view\public\header.html";i:1524236245;s:48:"D:\fix\application\admin\view\public\footer.html";i:1524321632;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -134,10 +134,8 @@
 <script src="/static/admin/js/plugins/switchery/switchery.js"></script>
 <script src="/static/admin/js/jquery.form.js"></script>
 <script src="/static/admin/js/layer/layer.js"></script>
-<!--<script src="/static/admin/js/plugins/layer/laydate/laydate.js"></script> 
-<script src="/static/admin/js/laypage/laypage.js"></script>
-<script src="/static/admin/js/laytpl/laytpl.js"></script> -->
 <script src="/static/admin/js/artisan.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.0/jquery.cookie.js"></script>
 <script>
     $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
 </script>
@@ -152,7 +150,8 @@
     var laytpl = layui.laytpl;
     var laypage = layui.laypage;
     var layer = layui.layer;
-    Ajaxpage();
+    var p = <?php echo htmlentities($p); ?>;
+    Ajaxpage(p);
     function Ajaxpage(curr){
         var key=$('#key').val();
         $.ajax({
@@ -182,7 +181,8 @@
                         groups: 3,//连续显示分页数
                         jump: function(obj, first){
                             if(!first){
-                                Ajaxpage(obj.curr)
+                                p = obj.curr;
+                                Ajaxpage(obj.curr);
                             }
                             $('#allpage').html('第'+ obj.curr +'页，共'+ obj.pages +'页');
                         }
@@ -196,14 +196,11 @@
                 });
             }
         })
-        // $.getJSON("<?php echo url('Role/getRoleData'); ?>", {page: curr || 1,key:key}, function(data){
-            
-        // });
     }
 
     //编辑角色
     function roleEdit(id){
-        location.href = '/admin/role/edit/id/'+id+'.html';
+        location.href = '/admin/role/edit/id/'+id+'/p/'+p+'.html';
     }
     //删除角色
     function roleDel(id){
@@ -212,6 +209,7 @@
                 url : "<?php echo url('Role/delete'); ?>",
                 type : 'get',
                 data : {
+                    token : $.cookie('token'),
                     id:id,
                 },
                 dataType : 'json',
@@ -219,7 +217,12 @@
                     if(data.code == 1){
                         layer.msg(data.msg,{icon:1,time:1000,shade: 0.1},function(index){
                             layer.close(index);
-                            location.href = "<?php echo url('Role/index'); ?>";
+                            if(p > data.allPage){
+                                location.href = '/admin/Role/index/p/' + data.allPage;
+                            }else{
+                                location.href = '/admin/Role/index/p/' + p;
+                            }
+                            
                         });
                     }else{
                         layer.msg(data.msg,{icon:5,time:1000,shade: 0.1},function(index){
@@ -240,7 +243,6 @@
     // function role_state(id){
     //     lunhui.status(id,'<?php echo url("role_state"); ?>');
     // }
-
     zNodes = '';
     var index = '';
     var index2 = '';
@@ -251,7 +253,7 @@
         index2 = layer.load(0, {shade: false}); //0代表加载的风格，支持0-2
         $.ajax({
             url:"<?php echo url('Role/getAccessData'); ?>", 
-            data:{'type' : 'get', 'id' : id }, 
+            data:{type : 'get', id : id ,token : $.cookie('token')}, 
             success:function(res){
                 //console.log(res);
                 layer.close(index2);
@@ -313,9 +315,10 @@
         $.ajax({
             url : "<?php echo url('Role/postAccessData'); ?>",
             data : {
-                'type' : 'give',
-                'id' : id,
-                'nodeArr' : NodeArr
+                type : 'give',
+                id : id,
+                nodeArr : NodeArr,
+                token : $.cookie('token'),
             },
             type:'post',
             dataType : 'json',
@@ -342,19 +345,6 @@
                 });
             }
         })
-        // $.post("<?php echo url('Role/getAccessData'); ?>", {'type' : 'give', 'id' : id, 'nodeArr' : NodeArr}, function(res){
-        //     layer.close(index);
-        //     if(res.code == 1){
-        //         $('#role').css('display','none');
-        //         layer.msg(res.msg,{icon:1,time:1500,shade: 0.1}, function(){
-        //             //Ajaxpage(1,5)
-        //         });
-        //     }else{
-
-        //         layer.msg(res.msg);
-        //     }
-
-        // }, 'json')
     })
 </script>
 </body>
